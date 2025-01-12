@@ -5,30 +5,28 @@ import vision from "@google-cloud/vision";
 import OpenAI from "openai";
 import getDbConnection from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
+import dotenv from "dotenv";
 import { Buffer } from "buffer";
 
-// Load Google credentials from the environment
-const googleCredentialsBase64 = process.env.GOOGLE_APPLICATION_CREDENTIALS_BASE64;
-if (!googleCredentialsBase64) {
-  throw new Error("GOOGLE_APPLICATION_CREDENTIALS_BASE64 is not set in the environment variables.");
+dotenv.config();
+
+// Parse credentials from the environment variable
+const googleCredentialsRaw = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON || "{}");
+
+// Replace escaped `\n` with actual newlines
+if (googleCredentialsRaw.private_key) {
+  googleCredentialsRaw.private_key = googleCredentialsRaw.private_key.replace(/\\n/g, "\n");
 }
 
-// Decode and parse the base64-encoded JSON credentials
-const googleCredentials = JSON.parse(
-  Buffer.from(googleCredentialsBase64, "base64").toString("utf8")
-);
-
-// Initialize the Vision API client with the decoded credentials
-const visionClient = new vision.ImageAnnotatorClient({
-  credentials: googleCredentials,
+// Initialize the Google Vision API client
+const visionClient = new (require("@google-cloud/vision").ImageAnnotatorClient)({
+  credentials: googleCredentialsRaw,
 });
-
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Save blog post in the database
 async function saveBlogPost(userId: string, title: string, content: string) {
   const sql = await getDbConnection();
   const [insertedPost] = await sql`
@@ -39,7 +37,6 @@ async function saveBlogPost(userId: string, title: string, content: string) {
   return insertedPost.id;
 }
 
-// Save quiz in the database
 async function saveQuiz(postId: string, quizzes: any[]) {
   const sql = await getDbConnection();
   for (const quiz of quizzes) {
@@ -50,7 +47,6 @@ async function saveQuiz(postId: string, quizzes: any[]) {
   }
 }
 
-// POST handler to process the image and generate a quiz
 export async function POST(req: NextRequest) {
   const clerkUser = await currentUser();
   if (!clerkUser?.id) {
@@ -63,7 +59,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    // Detect text in the image
     const [textResult] = await visionClient.textDetection(image);
     const detectedText = textResult.fullTextAnnotation?.text || "";
 
@@ -71,7 +66,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "No text detected." }, { status: 400 });
     }
 
-    // Generate quiz based on the detected text
     const prompt = `
       The following text was extracted from an image:
       "${detectedText}"
@@ -94,7 +88,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Failed to parse quiz data." }, { status: 500 });
     }
 
-    // Save the generated quiz in the database
     const postId = await saveBlogPost(clerkUser.id, "Generated Quiz", JSON.stringify(quizzes));
     await saveQuiz(postId, quizzes);
 
@@ -105,7 +98,6 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// GET handler to fetch quizzes for the authenticated user
 export async function GET(req: NextRequest) {
   try {
     const clerkUser = await currentUser();
@@ -116,7 +108,6 @@ export async function GET(req: NextRequest) {
 
     const sql = await getDbConnection();
 
-    // Fetch quizzes joined with posts for the user
     const quizzes = await sql`
       SELECT q.id, q.question, q.options, q.correct_answer, q.difficulty, p.title
       FROM quizzes q
