@@ -1,5 +1,7 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+ .env
+
 # dependencies
 /node_modules
 /.pnp
@@ -41,3 +43,6 @@ next-env.d.ts
 
 # google cloud key file
 *.total-triumph.json
+
+total-triumph.json
+total-triumph.json
