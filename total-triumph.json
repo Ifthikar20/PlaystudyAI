@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "total-triumph-443400-a5",
+  "private_key_id": "fc8728fffacb9ef76aa3b050fa8be4eaefc9a287",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDTGYkjGEBkbnhj\n9rJvaQr7oQa5zbTmziMpd4hs0TVVIsWvRx9Ywj7gDPDiajwem8/3plfW7RhWCQ+7\ni7qvyA/65XtVpHEieklTChf5Hoso2tnfS1q/dIFMBQ6Ks6//ggxSLnGs5fsgMuNt\nY8txMgXvfNgI7NFuACcjkRurBafl7wNh7sHWOPqzyZLdzfSdYHpoRqWnEosXpfeb\nha+cUYi2nnuqoU7jcQbWn+eK3xPhJ6P63Vgr3EW0wl67aM5w5lHK1hsLxiA5uWcw\n3NQkc0b4p86iowEqb1tmE0lddAR+NUFqbNUGuapIP8pGQmebu8dgDSVO/zcBnIqF\n3ud2OpvhAgMBAAECggEAFVsR+pDrgr2CRGqipo6z47zol0duM6NK/1juXkPT52b7\nJL5HN41/Gt90RxOEPXx5z43uePnHanzEMK70FfBhXXp1vbZDE7/XRyVQQ42JenqZ\na/ONnKzGn9ArJnEDLxAS+wVjzp/9hcZgJ6Le4/axjwbMPCrpDP3K99goOmb6E1Kp\ngG8WF7ICKmCT6gjOYWG45x2nWpbeqjuiRat19W5L1g6Dps4SB4u2Lf2BV8KT2wnu\n0x5jEGpHk0tvNT7AVPVLgV3JlNpCCsF1JNlfONWBCEebU6GNGfUqwF3Y7baCnYuV\n+qhV2PSkXZiOefe5T7VFp+qsk0J5GWNsFfA7kGZeGQKBgQD/aS/WTapdc+X0EFDe\n2rdmS2B2QDzJGXV3vLmnrJAUYPlPiFJWCwiMC6yfn4tIqRQR/A2IfoD9B7C2jbTy\n5GaCm/2aliV3VGRyzEFLmPWk8CFikOmXLfYPbOtRkmF3/JbSvdCefrXG5BSEtZP5\n0fPY1qi0f/0lzroTrDeEGTqYfwKBgQDTli8vOrXtURTg4igy8a+1eu/5fUx7IqDD\nxxlsri6Z7es5+8i5JlZ/NMKntM9KgA7dZ0ADACq1u9ts/4YUZb8xYyd3Un8cE3RP\n0LPHeZ+xt+C2ixZxCFsm2J8TYSRMQNHOHVifMr18SX2q8OVJSGgyml55sSiqawHC\ntaejlv+bnwKBgQD9oz2oOfRnXcMMfm9xAA6E/XHLvLsgkbG/uKE9y/ZA5pRu0NfD\nLq3MNYO1+MBe5dlSitX9qHL70/k/MLZzRzItni9YpqaKPDqMbh6hrkKzCux8b6Ap\nS7FBXE7L8OvuNd6pZWqZGwf1fWaK668Jtd/MhE+BAGEqfIL5KlrvSgaQjQKBgB5G\nEdA/JUKkZElc8oV/gTWFNorK+8Nui/QXK7MaJP7PROXR+cFME/o1cViPjU1Kj1Xs\nbQNA5duE2nt5ABUxDa8iUcZH3noE6pJ0+RQkec3y0kssEXTwziH7wp8COjBS4fIM\nzt5QYz5CQaHQv+3BV29OGRBuYbQohWL3nNnSRBZfAoGBAMzFCv+jisGCJrCy6e+Y\nboPeRzSN6MmAdOyOgVqq0fALXIpOvwTOw2muKZbMhmVXhYkEAttGa1rEzsiDHZTb\navZJAFh6wZrALW0Jiba45zSXC6sEdzVtrZkoAW/Y32c1hyUZOEhoGXmsa2F39yJU\ni0RXWmVSOephl3bNNPqnDMZS\n-----END PRIVATE KEY-----\n",
+  "client_email": "gamelearn@total-triumph-443400-a5.iam.gserviceaccount.com",
+  "client_id": "111657635644318119071",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/gamelearn%40total-triumph-443400-a5.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
