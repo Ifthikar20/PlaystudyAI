@@ -5,12 +5,20 @@ import { CldImage } from "next-cloudinary";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+interface Quiz {
+  id: string;
+  question: string;
+  options: string[];
+  correct_answer: string;
+  difficulty: string;
+}
+
 export default function UploadForm() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
-  const [responseJson, setResponseJson] = useState<any>(null); // For raw JSON response
+  const [responseJson, setResponseJson] = useState<Record<string, unknown> | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [quizzes, setQuizzes] = useState<any[]>([]); // Latest fetched quizzes
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
 
   // Fetch the latest quizzes for the authenticated user
   const fetchLatestQuizzes = async () => {
@@ -22,18 +30,18 @@ export default function UploadForm() {
       }
       const data = await response.json();
       setQuizzes(data.quizzes || []);
-    } catch (error: any) {
-      console.error("Error fetching quizzes:", error);
-      toast.error(error.message || "Failed to load quizzes.");
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error fetching quizzes:", error);
+        toast.error(error.message || "Failed to load quizzes.");
+      }
     }
   };
 
-  // Fetch quizzes on component mount
   useEffect(() => {
     fetchLatestQuizzes();
   }, []);
 
-  // Handle file selection
   const handleFileSelection = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -44,51 +52,54 @@ export default function UploadForm() {
     }
   };
 
-  // Upload image to Cloudinary
   const handleImageUpload = async () => {
     if (!selectedFile) {
       toast.error("No file selected. Please select a file before uploading.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", selectedFile);
-    formData.append(
-      "upload_preset",
-      process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
-    );
-
-    toast.info("Uploading image, please wait...");
-    try {
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to upload image.");
+    const reader = new FileReader();
+    reader.readAsDataURL(selectedFile);
+    reader.onloadend = async () => {
+      if (!reader.result) {
+        toast.error("Failed to read the file.");
+        return;
       }
 
-      const data = await response.json();
-      const secureUrl = data.secure_url;
-      setUploadedImageUrl(secureUrl);
-      toast.success("Image uploaded successfully!");
+      toast.info("Uploading image, please wait...");
 
-      // Send the image URL to the backend for OCR and quiz generation
-      handleOcrProcessing(secureUrl);
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      toast.error("An error occurred during upload.");
-    }
+      try {
+        const response = await fetch("/api/image-upload-cloudinary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: reader.result }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to upload image.");
+        }
+
+        const data = await response.json();
+        setUploadedImageUrl(data.url);
+        toast.success("Image uploaded successfully!");
+
+        handleOcrProcessing(data.url);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Error uploading image:", error);
+          toast.error("An error occurred during upload.");
+        }
+      }
+    };
+
+    reader.onerror = () => {
+      toast.error("Failed to read the file.");
+    };
   };
 
-  // Process image for OCR and quiz generation
   const handleOcrProcessing = async (imageUrl: string) => {
     setIsProcessing(true);
-    setResponseJson(null); // Reset response before processing
+    setResponseJson(null);
     toast.info("Processing image, this may take a moment...");
 
     try {
@@ -104,12 +115,14 @@ export default function UploadForm() {
       }
 
       const data = await response.json();
-      setResponseJson(data); // Store raw JSON response
+      setResponseJson(data);
       toast.success("Image processed successfully!");
-      fetchLatestQuizzes(); // Refresh quizzes after processing
-    } catch (error: any) {
-      console.error("Error processing image:", error);
-      toast.error(error.message || "An error occurred while processing the image.");
+      fetchLatestQuizzes();
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error processing image:", error);
+        toast.error(error.message || "An error occurred while processing the image.");
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -120,38 +133,18 @@ export default function UploadForm() {
       <ToastContainer />
       <h1>Image Upload and Quiz Display</h1>
 
-      {/* File Input */}
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelection}
-        className="upload-input"
-      />
-
-      {/* Upload Button */}
-      <button
-        onClick={handleImageUpload}
-        className="upload-button"
-        disabled={!selectedFile || isProcessing}
-      >
+      <input type="file" accept="image/*" onChange={handleFileSelection} className="upload-input" />
+      <button onClick={handleImageUpload} className="upload-button" disabled={!selectedFile || isProcessing}>
         {isProcessing ? "Processing..." : "Upload"}
       </button>
 
-      {/* Display Uploaded Image */}
       {uploadedImageUrl && (
         <div className="uploaded-image">
           <h2>Uploaded Image:</h2>
-          <CldImage
-            src={uploadedImageUrl}
-            width="500"
-            height="500"
-            crop="fill"
-            alt="Uploaded Image"
-          />
+          <CldImage src={uploadedImageUrl} width="500" height="500" crop="fill" alt="Uploaded Image" />
         </div>
       )}
 
-      {/* Display JSON Response */}
       {responseJson && (
         <div className="response-json">
           <h2>Response (JSON Format):</h2>
@@ -159,7 +152,6 @@ export default function UploadForm() {
         </div>
       )}
 
-      {/* Display Latest Fetched Quizzes */}
       {quizzes.length > 0 && (
         <div className="fetched-quizzes">
           <h2>Latest Uploaded Quiz:</h2>
@@ -168,7 +160,7 @@ export default function UploadForm() {
               <li key={quiz.id}>
                 <h3>{quiz.question}</h3>
                 <ul>
-                  {quiz.options.map((option: string, index: number) => (
+                  {quiz.options.map((option, index) => (
                     <li key={index}>{option}</li>
                   ))}
                 </ul>

@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import getDbConnection from "./db";
 
-// Define a User type that matches the structure of the users table
 type User = {
   email: string;
   full_name: string;
@@ -10,9 +9,8 @@ type User = {
   status?: string;
 };
 
-// Define the Sql type to represent the database query interface
 type Sql = {
-  <T = unknown>(query: TemplateStringsArray, ...args: any[]): Promise<T>;
+  <T = unknown>(query: TemplateStringsArray, ...args: unknown[]): Promise<T>;
 };
 
 export async function handleSubscriptionDeleted({
@@ -71,11 +69,9 @@ async function createOrUpdateUser(
   customerId: string
 ) {
   try {
-    // Type the query result explicitly
     const user = await sql<User[]>`SELECT * FROM users WHERE email = ${customer.email}`;
     
     if (user.length === 0) {
-      // Insert a new user if not found
       await sql`INSERT INTO users (email, full_name, customer_id) VALUES (${customer.email}, ${customer.name}, ${customerId})`;
     }
   } catch (err) {

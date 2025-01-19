@@ -59,11 +59,11 @@ export default async function Dashboard() {
           </Badge>
 
           <h2 className="capitalize text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-            Start creating amazing content
+            Turn your study material to more interactive games..
           </h2>
 
           <p className="mt-2 text-lg leading-8 text-gray-600 max-w-2xl text-center">
-            Upload your audio or video file and let our AI do the magic!
+            Upload your Image or Content and let our AI do the magic!
           </p>
 
           {(isBasicPlan || isProPlan) && (

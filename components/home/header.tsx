@@ -25,7 +25,7 @@ export default function Header() {
         <NavLink href="/">
           <span className="flex items-center gap-2 shrink-0">
             
-            <span className="font-extrabold text-lg">SpeakEasy</span>
+            <span className="font-extrabold text-lg">StudyGames.AI</span>
           </span>
         </NavLink>
       </div>

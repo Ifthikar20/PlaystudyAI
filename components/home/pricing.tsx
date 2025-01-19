@@ -1,4 +1,4 @@
-import { ArrowRight, CheckIcon } from "lucide-react";
+import {  CheckIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -62,7 +62,7 @@ export default function Pricing() {
                         href={paymentLink}
                         className="flex gap-1 items-center"
                       >
-                        Get SpeakEasy <ArrowRight size={18} />
+                        Try StudyGames
                       </Link>
                     </Button>
                   </div>

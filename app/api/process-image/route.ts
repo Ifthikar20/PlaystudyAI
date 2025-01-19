@@ -8,24 +8,29 @@ import { ImageAnnotatorClient } from "@google-cloud/vision";
 import dotenv from "dotenv";
 
 dotenv.config();
-// Parse credentials from the environment variable
+
 const googleCredentialsRaw = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON || "{}");
 
-// Replace escaped `\n` with actual newlines
 if (googleCredentialsRaw.private_key) {
   googleCredentialsRaw.private_key = googleCredentialsRaw.private_key.replace(/\\n/g, "\n");
 }
 
-// Initialize the Google Vision API client
 const visionClient = new ImageAnnotatorClient({
   credentials: googleCredentialsRaw,
 });
-// Initialize OpenAI client
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function saveBlogPost(userId: string, title: string, content: string) {
+interface Quiz {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+  difficulty: number;
+}
+
+async function saveBlogPost(userId: string, title: string, content: string): Promise<string> {
   const sql = await getDbConnection();
   const [insertedPost] = await sql`
     INSERT INTO posts (user_id, title, content)
@@ -35,7 +40,7 @@ async function saveBlogPost(userId: string, title: string, content: string) {
   return insertedPost.id;
 }
 
-async function saveQuiz(postId: string, quizzes: any[]) {
+async function saveQuiz(postId: string, quizzes: Quiz[]): Promise<void> {
   const sql = await getDbConnection();
   for (const quiz of quizzes) {
     await sql`
@@ -45,13 +50,13 @@ async function saveQuiz(postId: string, quizzes: any[]) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   const clerkUser = await currentUser();
   if (!clerkUser?.id) {
     return NextResponse.json({ error: "User not authenticated." }, { status: 401 });
   }
 
-  const { image } = await req.json();
+  const { image } = await request.json();
   if (!image) {
     return NextResponse.json({ error: "Image URL is required." }, { status: 400 });
   }
@@ -67,7 +72,6 @@ export async function POST(req: NextRequest) {
     const prompt = `
       The following text was extracted from an image:
       "${detectedText}"
-      
       Generate a quiz in JSON format:
       [
         { "question": "What is the main idea?", "options": ["Option 1", "Option 2"], "correctAnswer": "Option 1", "difficulty": 2 }
@@ -79,7 +83,7 @@ export async function POST(req: NextRequest) {
       messages: [{ role: "user", content: prompt }],
     });
 
-    let quizzes = [];
+    let quizzes: Quiz[] = [];
     try {
       quizzes = JSON.parse(chatResponse.choices[0]?.message?.content || "[]");
     } catch {
@@ -96,7 +100,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(): Promise<NextResponse> {
   try {
     const clerkUser = await currentUser();
     if (!clerkUser?.id) {
