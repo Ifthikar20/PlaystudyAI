@@ -1,6 +1,20 @@
 import Stripe from "stripe";
 import getDbConnection from "./db";
 
+// Define a User type that matches the structure of the users table
+type User = {
+  email: string;
+  full_name: string;
+  customer_id: string;
+  price_id?: string;
+  status?: string;
+};
+
+// Define the Sql type to represent the database query interface
+type Sql = {
+  <T = unknown>(query: TemplateStringsArray, ...args: any[]): Promise<T>;
+};
+
 export async function handleSubscriptionDeleted({
   subscriptionId,
   stripe,
@@ -9,8 +23,8 @@ export async function handleSubscriptionDeleted({
   stripe: Stripe;
 }) {
   try {
+    const sql: Sql = await getDbConnection();
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    const sql = await getDbConnection();
     await sql`UPDATE users SET status = 'cancelled' WHERE customer_id = ${subscription.customer}`;
   } catch (error) {
     console.error("Error handling subscription deletion", error);
@@ -29,19 +43,17 @@ export async function handleCheckoutSessionCompleted({
   const customer = await stripe.customers.retrieve(customerId);
   const priceId = session.line_items?.data[0].price?.id;
 
-  const sql = await getDbConnection();
+  const sql: Sql = await getDbConnection();
 
   if ("email" in customer && priceId) {
     await createOrUpdateUser(sql, customer, customerId);
-    //update user subscription
     await updateUserSubscription(sql, priceId, customer.email as string);
-    //insert the payment
     await insertPayment(sql, session, priceId, customer.email as string);
   }
 }
 
 async function insertPayment(
-  sql: any,
+  sql: Sql,
   session: Stripe.Checkout.Session,
   priceId: string,
   customerEmail: string
@@ -54,13 +66,16 @@ async function insertPayment(
 }
 
 async function createOrUpdateUser(
-  sql: any,
+  sql: Sql,
   customer: Stripe.Customer,
   customerId: string
 ) {
   try {
-    const user = await sql`SELECT * FROM users WHERE email = ${customer.email}`;
+    // Type the query result explicitly
+    const user = await sql<User[]>`SELECT * FROM users WHERE email = ${customer.email}`;
+    
     if (user.length === 0) {
+      // Insert a new user if not found
       await sql`INSERT INTO users (email, full_name, customer_id) VALUES (${customer.email}, ${customer.name}, ${customerId})`;
     }
   } catch (err) {
@@ -69,12 +84,12 @@ async function createOrUpdateUser(
 }
 
 async function updateUserSubscription(
-  sql: any,
+  sql: Sql,
   priceId: string,
   email: string
 ) {
   try {
-    await sql`UPDATE users SET price_id = ${priceId}, status = 'active' where email = ${email}`;
+    await sql`UPDATE users SET price_id = ${priceId}, status = 'active' WHERE email = ${email}`;
   } catch (err) {
     console.error("Error in updating user", err);
   }

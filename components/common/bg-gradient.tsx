@@ -1,6 +1,5 @@
 export default function BgGradient({
     children,
-    className,
   }: {
     children?: React.ReactNode;
     className?: string;

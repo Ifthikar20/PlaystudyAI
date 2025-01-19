@@ -1,15 +1,13 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import vision from "@google-cloud/vision";
 import OpenAI from "openai";
 import getDbConnection from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
+import { ImageAnnotatorClient } from "@google-cloud/vision";
 import dotenv from "dotenv";
-import { Buffer } from "buffer";
 
 dotenv.config();
-
 // Parse credentials from the environment variable
 const googleCredentialsRaw = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON || "{}");
 
@@ -19,7 +17,7 @@ if (googleCredentialsRaw.private_key) {
 }
 
 // Initialize the Google Vision API client
-const visionClient = new (require("@google-cloud/vision").ImageAnnotatorClient)({
+const visionClient = new ImageAnnotatorClient({
   credentials: googleCredentialsRaw,
 });
 // Initialize OpenAI client

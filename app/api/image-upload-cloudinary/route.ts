@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     }
 
     // Convert Blob to Buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
+   
 
     // Upload to Cloudinary
     const uploadResult = await cloudinary.uploader.upload_stream(

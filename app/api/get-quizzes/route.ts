@@ -1,10 +1,10 @@
 "use server";
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import getDbConnection from "@/lib/db";
 import { currentUser } from "@clerk/nextjs/server";
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const clerkUser = await currentUser();
     if (!clerkUser?.id) {
