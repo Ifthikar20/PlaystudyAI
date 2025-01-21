@@ -32,7 +32,7 @@ async function saveBlogPost(userId: string, title: string, content: string) {
   return insertedPost.id;
 }
 
-async function saveQuiz(postId: string, quizzes: any[]) {
+async function saveQuiz(postId: string, quizzes: Array<{ question: string; options: string[]; correctAnswer: string; difficulty: number }>) {
   const sql = await getDbConnection();
   for (const quiz of quizzes) {
     await sql`
@@ -98,33 +98,33 @@ export async function POST(req: NextRequest) {
     console.error("Error processing request:", error);
     return NextResponse.json({ 
       error: "Failed to process request",
-      details: error.message 
+      details: error
     }, { status: 500 });
   }
 }
 
-export async function GET(req: NextRequest) {
-  try {
-    const clerkUser = await currentUser();
-    if (!clerkUser?.id) {
-      return NextResponse.json({ error: "User not authenticated." }, { status: 401 });
-    }
-    const userId = clerkUser.id;
+// export async function GET(req: NextRequest) {
+//   try {
+//     const clerkUser = await currentUser();
+//     if (!clerkUser?.id) {
+//       return NextResponse.json({ error: "User not authenticated." }, { status: 401 });
+//     }
+//     const userId = clerkUser.id;
 
-    const sql = await getDbConnection();
+//     const sql = await getDbConnection();
 
-    // Fetch quizzes joined with posts for the user
-    const quizzes = await sql`
-      SELECT q.id, q.question, q.options, q.correct_answer, q.difficulty, p.title
-      FROM quizzes q
-      JOIN posts p ON q.post_id = p.id
-      WHERE p.user_id = ${userId}
-      ORDER BY q.created_at DESC;
-    `;
+//     // Fetch quizzes joined with posts for the user
+//     const quizzes = await sql`
+//       SELECT q.id, q.question, q.options, q.correct_answer, q.difficulty, p.title
+//       FROM quizzes q
+//       JOIN posts p ON q.post_id = p.id
+//       WHERE p.user_id = ${userId}
+//       ORDER BY q.created_at DESC;
+//     `;
 
-    return NextResponse.json({ quizzes }, { status: 200 });
-  } catch (error) {
-    console.error("Error fetching quizzes:", error);
-    return NextResponse.json({ error: "Internal server error." }, { status: 500 });
-  }
-}
+//     return NextResponse.json({ quizzes }, { status: 200 });
+//   } catch (error) {
+//     console.error("Error fetching quizzes:", error);
+//     return NextResponse.json({ error: "Internal server error." }, { status: 500 });
+//   }
+// }
